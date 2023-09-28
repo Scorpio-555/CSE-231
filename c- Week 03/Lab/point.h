@@ -21,11 +21,13 @@ class Point
 public:
     // constructors
     Point() : x(0), y(0) {}
-    Point(int x, int y);
+    Point(int location) : x(location % 8), y(location / 8) {};
+    Point(int x, int y) : x(x), y(y) {};
 
     // getters
     int getX()       const { return x; }
     int getY()       const { return y; }
+    int getInt() { return y * 8 + x; }
 
     // setters
     void setX(int x) { this->x = x; }
