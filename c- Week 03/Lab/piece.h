@@ -21,7 +21,7 @@ public:
 	void kill() { alive = false; }
 
 	// virtual functions
-	virtual bool move(Point point);
+	virtual bool move(Point newPosition);
 
 	// pure virtual functions
 	virtual list<Point> getAttackSquares() = 0;
