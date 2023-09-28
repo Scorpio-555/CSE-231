@@ -1,25 +1,33 @@
 #include "piece.h"
+#include "game.h"
 
-bool Piece::move(Point point)
+bool Piece::move(Point newPosition)
 {
-    /*IF newPosition IN getPosibleMoves()
+    bool moveFound = false;
 
-        // standard stuff shared by all chess pieces
+    for (Point point : getPossibleMoves()) {
+        if (newPosition.getInt() == point.getInt()) {
+            moveFound = true;
+        }
+    }
 
-        target <-- Game.getPieceAt(newPosition)
-        emptyTarget <-- (target = NULL)
+    if (moveFound) {
+        Piece* target = Game::getPieceAt(newPosition);
+        bool targetIsEmpty = (target == nullptr);
 
-        IF NOT emptyTarget
-            IF target.getName() != "King"
-                target.kill()
-            ELSE
-                RETURN FALSE
+        if (targetIsEmpty == false) {
+            if (target->getName() != Name::KING) {
+                target->kill();
+            }
+            else {
+                return false;
+            }
+        }
 
-        oldPosition <-- position
-        position <-- newPosition
+        position = newPosition;
 
-        return true
-    */
+        return true;
+    }
 
     return false;
 }
