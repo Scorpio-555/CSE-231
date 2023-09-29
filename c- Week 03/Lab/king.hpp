@@ -11,3 +11,18 @@
 #include <stdio.h>
 
 #endif /* king_hpp */
+
+class King : public Piece
+{
+public:
+    King(Color color, Point point)
+    bool getHasMoved {};
+    void draw();
+    array<Point> getAttackSquares();
+    array<Point> getPossibleMoves();
+    bool move(Point point);
+    
+private:
+    bool hasMoved;
+    
+}
