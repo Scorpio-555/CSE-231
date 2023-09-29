@@ -23,6 +23,6 @@ public:
     bool move(Point point);
     
 private:
-    bool hasMoved;
+    bool hasMoved = false;
     
 }
