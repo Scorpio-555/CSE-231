@@ -1,5 +1,5 @@
 #include <list>
-
+#include <set>
 #include "piece.h"
 
 #pragma once
@@ -10,18 +10,22 @@ class Game {
 	friend class TestGame;
 public:
 	static Piece* getPieceAt(Point point);
-	static list<Point> getEnemyAttackSquares(Color yourColor);
-	static list<Point> getCheckingPath() { return checkingPath; }
+	static Piece* getKing(Color color);
+	static set<int> getEnemyAttackSquares(Color yourColor);
+	static set<int> getCheckingPath() { return checkingPath; }
 
 	static void addPiece(Piece * piece);
 	static void toggleTurnHolder();
 
 	static bool amIGuardingKing(Point point);
+	static Point getDirection(Point startingPoint, Point secondPoint);
 	static bool movePiece(Point from, Point to);
 	static void draw(Point hoverPos, Point selectPos);
 
-	static bool isCheckMate();
+	static bool isEndGame();
 	static bool inCheck(Color yourColor);
+	static bool isCheckmate() { return checkmate; }
+	static bool isStalemate() { return stalemate; }
 
 	static void removeZombies();
 	static void reset();
@@ -34,5 +38,7 @@ private:
 	static Color currentTurnHolder;
 	static Piece* kingInCheck;
 	static list<Piece*> checkingPieces;
-	static list<Point> checkingPath;
+	static set<int> checkingPath;
+	static bool checkmate;
+	static bool stalemate;
 };
