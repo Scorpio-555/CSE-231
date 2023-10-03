@@ -12,7 +12,7 @@ private:
 	void testGetEnemyAttackSquares();
 	void testGetCheckingPath();
 	void testMovePiece();
-	void testIsCheckMate();
+	void testIsEndGame();
 	void testInCheck();
 	void testRemoveZombies();
 };
