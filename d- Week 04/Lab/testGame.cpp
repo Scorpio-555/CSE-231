@@ -2,6 +2,10 @@
 #include "game.h"
 #include "pawn.h"
 #include "king.h"
+#include "rook.h"
+#include "knight.h"
+#include "bishop.h"
+#include "queen.h"
 #include <cassert>
 #include <set>
 
@@ -16,14 +20,20 @@ void TestGame::run()
 	testGetEnemyAttackSquares();
 	testGetCheckingPath();
 	testMovePiece();
-	testIsCheckMate();
 	testInCheck();
+	testIsEndGame();
 	testRemoveZombies();
 }
 
 void TestGame::testReset()
 {
 	// SETUP
+	Piece* pawn = new Pawn(Color::WHITE, Point());
+	Game::pieces.push_back(pawn);
+	Game::currentTurnHolder = Color::BLACK;
+	Game::kingInCheck = pawn;
+	Game::checkingPieces.push_back(pawn);
+	Game::checkingPath.insert(Point().getInt());
 	// EXERCISE
 	Game::reset();
 	// VERIFY
@@ -50,7 +60,6 @@ void TestGame::testAddPiece()
 		assert(piece->getColor() == Color::WHITE);
 	}
 	// TEARDOWN
-	delete[] pawn;
 	Game::reset();
 }
 
@@ -62,7 +71,7 @@ void TestGame::testNewGame()
 	// VERIFY
 	assert(Game::pieces.size() == 32);
 	for (Piece * piece : Game::pieces) {
-		cout << "Test New Game Position " << piece->getPosition().getInt() << endl;
+		//cout << "Test New Game Position " << piece->getPosition().getInt() << endl;
 
 		assert(piece->isAlive());
 		if (piece->getColor() == Color::WHITE) {
@@ -78,9 +87,6 @@ void TestGame::testNewGame()
 	assert(Game::checkingPieces.size() == 0);
 	assert(Game::checkingPath.size() == 0);
 	// TEARDOWN
-	for (Piece * piece : Game::pieces) {
-		delete[] piece;
-	}
 	Game::reset();
 }
 
@@ -97,7 +103,6 @@ void TestGame::testGetPieceAt()
 	assert(pawn->getPosition() == piece->getPosition());
 	assert(pawn->isAlive() == piece->isAlive());
 	// TEARDOWN
-	delete[] pawn;
 	Game::reset();
 }
 
@@ -109,7 +114,7 @@ void TestGame::toggleTurnHolder()
 	Game::kingInCheck = king;
 	Piece* pawn = new Pawn(Color::BLACK, Point(3, 1));
 	Game::checkingPieces.push_back(pawn);
-	Game::checkingPath.push_back(pawn->getPosition());
+	Game::checkingPath.insert(pawn->getPosition().getInt());
 	Game::pieces.push_back(king);
 	Game::pieces.push_back(pawn);
 	// EXERCISE
@@ -125,8 +130,6 @@ void TestGame::toggleTurnHolder()
 	assert(Game::checkingPath.size() == 0);		//    |---- these should be reset by toggleTurnHolder
 	assert(Game::checkingPieces.size() == 0);	// ---|
 	// TEARDOWN
-	delete[] king;
-	delete[] pawn;
 	Game::reset();
 }
 
@@ -144,9 +147,6 @@ void TestGame::amIGuardingKing()
 	// VERIFY
 	assert(testPassed);
 	// TEARDOWN
-	delete[] king;
-	delete[] pawn;
-	delete[] rook;
 	Game::reset();
 }
 
@@ -160,12 +160,11 @@ void TestGame::testGetEnemyAttackSquares()
 	set<int> positions;
 	list<Point> squares;
 	// EXERCISE
-	squares = Game::getEnemyAttackSquares(Color::WHITE); // <--|-- a piece asks the game class for enemy squares. 
-	for (Point p : squares) {							 //    |   The piece tells the game what its color is,
-		positions.insert(p.getInt());					 //    |-- and game returns squares for the opposite color
-	}
+	positions = Game::getEnemyAttackSquares(Color::WHITE); // <--|-- a piece asks the game class for enemy squares. 
+														   //    |   The piece tells the game what its color is,
+														   //    |-- and game returns squares for the opposite color
 	// VERIFY
-	assert(positions.size() == 8);
+	assert(positions.size() == 9);
 	assert(positions.find(1) != positions.end());
 	assert(positions.find(2) != positions.end());
 	assert(positions.find(3) != positions.end());
@@ -173,10 +172,9 @@ void TestGame::testGetEnemyAttackSquares()
 	assert(positions.find(5) != positions.end());
 	assert(positions.find(6) != positions.end());
 	assert(positions.find(7) != positions.end());
+	assert(positions.find(8) != positions.end());  // rook needs to put king in check
 	assert(positions.find(16) != positions.end()); // rook needs to let king know that he can't move to Point(0, 2)
 	// TEARDOWN
-	delete[] king;
-	delete[] rook;
 	Game::reset();
 }
 
@@ -189,21 +187,14 @@ void TestGame::testGetCheckingPath()
 	Game::addPiece(rook);
 	Game::currentTurnHolder = Color::WHITE;
 	Game::determineCheck();	// sets variables such as checkingPath, checkingPieces, and kingInCheck
-	set<int> positions;
-	list<Point> squares;
 	// EXERCISE
-	squares = Game::getCheckingPath();
-	for (Point p : squares) {
-		positions.insert(p.getInt());
-	}
+	set<int> positions = Game::getCheckingPath();
 	// VERIFY
-	assert(squares.size() == 3);
+	assert(positions.size() == 3);
 	assert(positions.find(12) != positions.end()); 
 	assert(positions.find(20) != positions.end());
 	assert(positions.find(28) != positions.end());
 	// TEARDOWN
-	delete[] king;
-	delete[] rook;
 	Game::reset();
 }
 
@@ -224,33 +215,7 @@ void TestGame::testMovePiece()
 	assert(pawnMoved);
 	assert(pawn->getPosition() == Point(0, 2));
 	// TEARDOWN
-	delete[] pawn;
-	delete[] rook;
 	Game::reset();
-}
-
-void TestGame::testIsCheckMate()
-{
-	// SETUP
-	Piece* king = new King(Color::WHITE, Point(4, 0));
-	Piece* rook0 = new Rook(Color::BLACK, Point(0, 0));
-	Piece* rook1 = new Rook(Color::BLACK, Point(0, 2));
-	Game::addPiece(king);
-	Game::addPiece(rook0);
-	Game::addPiece(rook1);
-	Game::currentTurnHolder = Color::WHITE;
-	bool notCheckMatePassed;
-	bool isCheckMatePassed;
-	// EXERCISE
-	notCheckMatePassed = (Game::isCheckMate() == false);
-	Game::currentTurnHolder = Color::BLACK;
-	Game::movePiece(rook1->getPosition(), Point(0, 1));
-	Game::currentTurnHolder = Color::WHITE;
-	isCheckMatePassed = (Game::isCheckMate() == true);
-	// VERIFY
-	assert(notCheckMatePassed);
-	assert(isCheckMatePassed);
-	// TEARDOWN
 }
 
 void TestGame::testInCheck()
@@ -270,9 +235,37 @@ void TestGame::testInCheck()
 	assert(blackNotInCheck);
 	assert(whiteInCheck);
 	// TEARDOWN
-	delete[] kingW;
-	delete[] kingB;
-	delete[] rook;
+	Game::reset();
+}
+
+void TestGame::testIsEndGame()
+{
+	// SETUP
+	Piece* king = new King(Color::WHITE, Point(4, 0));
+	Piece* pawnW = new Pawn(Color::WHITE, Point(7, 5));
+	Piece* pawnB = new Pawn(Color::BLACK, Point(7, 6));
+	Piece* rook0 = new Rook(Color::BLACK, Point(0, 0));
+	Piece* rook1 = new Rook(Color::BLACK, Point(0, 2));
+	Game::addPiece(king);
+	Game::addPiece(pawnW);
+	Game::addPiece(pawnB);
+	Game::addPiece(rook0);
+	Game::addPiece(rook1);
+	Game::currentTurnHolder = Color::WHITE;
+	bool notCheckMatePassed;
+	bool isCheckMatePassed;
+	// EXERCISE
+	notCheckMatePassed = (Game::isEndGame() == false);
+	Game::currentTurnHolder = Color::BLACK;
+	Game::movePiece(rook1->getPosition(), Point(0, 1));
+	Game::currentTurnHolder = Color::WHITE;
+	isCheckMatePassed = (Game::isEndGame() == true);
+	// VERIFY
+	assert(notCheckMatePassed);
+	assert(isCheckMatePassed);
+	assert(Game::checkmate);
+	assert(Game::stalemate == false);
+	// TEARDOWN
 	Game::reset();
 }
 
@@ -291,7 +284,5 @@ void TestGame::testRemoveZombies()
 	assert(Game::getPieceAt(Point(0, 1)) == nullptr);
 	assert(Game::getPieceAt(Point(1, 1))->isAlive());
 	// TEARDOWN
-	delete[] pawn0;
-	delete[] pawn1;
 	Game::reset();
 }
