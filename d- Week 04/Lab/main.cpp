@@ -1,13 +1,11 @@
 #include <iostream>  // for CIN and COUT
 #include <string>
-#include <cmath>
 #include <numbers>
-#include<list>
+#include <list>
 #include <cmath>
 #include <map>
 #include <iterator>
 #include <cassert>
-
 #include "testKing.h"
 #include "testGame.h"
 
