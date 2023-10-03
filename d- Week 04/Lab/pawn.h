@@ -7,13 +7,16 @@ class Pawn : public Piece
 public:
 	Pawn(Color color, Point point);
 	
-	list<Point> getAttackSquares();
+	set<int> getAttackSquares();
 	list<Point> getPossibleMoves();
 
 	static void resetEnPotentialEnPassant() { potentialEnPassant = Point(-1,-1); }
 
-	bool move(Point point);
+	bool jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck);
+	//bool move(Point newPosition);
 	void draw();
+protected:
+	void resurrect() { alive = true; }
 private:
 	static Point potentialEnPassant;
 	int firstRank;
