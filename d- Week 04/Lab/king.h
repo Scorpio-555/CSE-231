@@ -8,7 +8,7 @@ public:
     King(Color color, Point point);
 
     bool getHasMoved() { return hasMoved; }
-    list<Point> getAttackSquares();
+    set<int> getAttackSquares();
     list<Point> getPossibleMoves();
 
     void draw();
