@@ -1,10 +1,13 @@
 #include "testKing.h"
 #include "king.h"
 #include "pawn.h"
+#include "rook.h"
+#include "knight.h"
 #include "game.h"
+#include "bishop.h"
+#include "queen.h"
 
 #include <cassert>
-
 void TestKing::run()
 {
 	Game::reset();
@@ -38,7 +41,6 @@ void TestKing::testOneSpaceH()
 	// VERIFY
 	assert(moveSuccessful);
 	// TEARDOWN
-	delete[] test1King;
 	Game::reset();
 }
 
@@ -55,7 +57,6 @@ void TestKing::testOneSpaceV()
 	// VERIFY
 	assert(moveSuccessful);
 	// TEARDOWN
-	delete[] test2King;
 	Game::reset();
 }
 
@@ -74,7 +75,6 @@ void TestKing::testOneSpaceD()
 	// VERIFY
 	assert(moveSuccessful);
 	// TEARDOWN
-	delete[] test3King;
 	Game::reset();
 }
 
@@ -91,7 +91,6 @@ void TestKing::testTwoSpaceH()
 	assert(!moveSuccessful);
 	assert(test4King->getPosition() == Point(6, 3));
 	// TEARDOWN
-	delete[] test4King;
 	Game::reset();
 }
 
@@ -108,7 +107,6 @@ void TestKing::testTwoSpaceV()
 	assert(!moveSuccessful);
 	assert(test5King->getPosition() == Point(5, 3));
 	// TEARDOWN
-	delete[] test5King;
 	Game::reset();
 }
 
@@ -125,7 +123,6 @@ void TestKing::testTwoSpaceD()
 	assert(!moveSuccessful);
 	assert(test6King->getPosition() == Point(3, 6));
 	// TEARDOWN
-	delete[] test6King;
 	Game::reset();
 }
 
@@ -150,9 +147,6 @@ void TestKing::testAttackH()
 	assert(!test7PawnL->isAlive());
 	assert(!test7PawnR->isAlive());
 	// TEARDOWN
-	delete[] test7King;
-	delete[] test7PawnL;
-	delete[] test7PawnR;
 	Game::reset();
 }
 
@@ -177,9 +171,6 @@ void TestKing::testAttackV()
 	assert(!test8PawnU->isAlive());
 	assert(!test8PawnD->isAlive());
 	// TEARDOWN
-	delete[] test8King;
-	delete[] test8PawnU;
-	delete[] test8PawnD;
 	Game::reset();
 }
 
@@ -212,11 +203,6 @@ void TestKing::testAttackD()
 	assert(!test9PawnSE->isAlive());
 	assert(!test9KnightNE->isAlive());
 	// TEARDOWN
-	delete[] test9King;
-	delete[] test9RookSW;
-	delete[] test9KnightNW;
-	delete[] test9PawnSE;
-	delete[] test9KnightNE;
 	Game::reset();
 }
 
@@ -236,8 +222,6 @@ void TestKing::testAttackComrade()
 	assert(test10King->getPosition() == Point(3, 3));
 	assert(test10Pawn->isAlive());
 	// TEARDOWN
-	delete[] test10King;
-	delete[] test10Pawn;
 	Game::reset();
 }
 
@@ -256,8 +240,6 @@ void TestKing::testMoveIntoCheck()
 	assert(!moveSuccessful);
 	assert(test11King->getPosition() == Point(4, 7));
 	// TEARDOWN
-	delete[] test11King;
-	delete[] test11Bishop;
 	Game::reset();
 }
 
@@ -276,8 +258,6 @@ void TestKing::testMoveOutOfCheck()
 	assert(moveSuccessful);
 	assert(test12King->getPosition() == Point(5, 7));
 	// TEARDOWN
-	delete[] test12King;
-	delete[] test12Queen;
 	Game::reset();
 }
 
@@ -298,9 +278,6 @@ void TestKing::testStillInCheck()
 	assert(!moveSuccessful);
 	assert(test13King->getPosition() == Point(1, 7));
 	// TEARDOWN
-	delete[] test13King;
-	delete[] test13Rook;
-	delete[] test13Knight;
 	Game::reset();
 }
 
@@ -326,8 +303,6 @@ void TestKing::testQueensCastle()
 	assert(moveSuccessful);
 	assert(test14King->getPosition() == Point(2, 0));
 	// TEARDOWN
-	delete[] test14King;
-	delete[] test14Rook;
 	Game::reset();
 }
 
@@ -346,8 +321,6 @@ void TestKing::testKingsCastle()
 	assert(moveSuccessful);
 	assert(test14King->getPosition() == Point(6, 0));
 	// TEARDOWN
-	delete[] test14King;
-	delete[] test14Rook;
 	Game::reset();
 }
 
@@ -381,11 +354,5 @@ void TestKing::testFailedCastle()
 	assert(test15KingW->getPosition() == Point(4, 0));
 	assert(test15KingB->getPosition() == Point(4, 7));
 	// TEARDOWN
-	delete[] test15KingW;
-	delete[] test15KingB;
-	delete[] test15RookL;
-	delete[] test15Queen;
-	delete[] test15RookW;
-	delete[] test15RookR;
 	Game::reset();
 }
