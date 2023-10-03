@@ -35,8 +35,10 @@ public:
     void addX(int dx) { setX(getX() + dx); }
     void addY(int dy) { setY(getY() + dy); }
 
+    bool inBounds() { return x >= 0 && x <= 7 && y >=0 && y <= 7; }
     bool operator == (const Point& pt) { return pt.getInt() == getInt(); }
     bool operator != (const Point& pt) { return pt.getInt() != getInt(); }
+    Point operator + (const Point& pt) { return Point(x + pt.getX(), y + pt.getY()); }
 
 private:
     int x;           // horizontal position
@@ -46,3 +48,5 @@ private:
 // stream I/O useful for debugging
 std::ostream& operator << (std::ostream& out, const Point& pt);
 std::istream& operator >> (std::istream& in, Point& pt);
+
+
