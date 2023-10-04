@@ -173,30 +173,13 @@ bool Game::movePiece(Point from, Point to)
 	if (piece->getName() != Name::PAWN) {
 		Pawn::resetEnPotentialEnPassant();
 	}
-	
+
 	return piece->move(to);
 }
 
 void Game::draw(Point hoverPos, Point selectPos)
 {
 }
-
-/*bool Game::isStalemate()
-{
-	list<Piece*> currentTeam = list<Piece*>();
-
-	for (Piece* piece : pieces) {
-		if (piece->getColor() == currentTurnHolder) {
-			currentTeam.push_back(piece);
-		}
-	}
-
-
-	// if current turn holder has only a king, or has no possible moves,
-		//return true
-	//else
-	return false;
-}*/
 
 bool Game::isEndGame()
 {
