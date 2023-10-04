@@ -2,11 +2,9 @@
 
 #pragma once
 
-class Bishop : public Piece
+class Bishop : public SlidingPiece
 {
 public:
 	Bishop(Color color, Point position);
-	set<int> getAttackSquares();
-	list<Point> getPossibleMoves();
 	void draw();
 };
