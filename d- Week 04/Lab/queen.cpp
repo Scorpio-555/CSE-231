@@ -1,4 +1,5 @@
 #include "queen.h"
+#include "game.h"
 
 Queen::Queen(Color color, Point position)
 {
@@ -6,16 +7,12 @@ Queen::Queen(Color color, Point position)
 	alive = true;
 	this->color = color;
 	this->position = position;
-}
-
-set<int> Queen::getAttackSquares()
-{
-	return set<int>();
-}
-
-list<Point> Queen::getPossibleMoves()
-{
-	return list<Point>();
+	moveList =
+	{
+		Point(-1, 1),  Point(0, 1),  Point(1, 1),
+		Point(-1, 0),                Point(1, 0),
+		Point(-1, -1), Point(0, -1), Point(1, -1)
+	};
 }
 
 void Queen::draw()
