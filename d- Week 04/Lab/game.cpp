@@ -193,23 +193,20 @@ bool Game::isEndGame()
 		}
 	}
 
-	if (currentTeam.size() == 1) {
-		if (kingInCheck != nullptr) {
-			checkmate = true;
-		}
-		else{
-			stalemate = true;
-		}
-
+	// with just two kings, it's stalemate
+	if (pieces.size() == 2) {
+		stalemate = true;
 		return true;
 	}
 
+	// if the current turn holder can make a move, game on!
 	for (Piece* piece : currentTeam) {
 		if (piece->getPossibleMoves().size() > 0) {
 			return false;
 		}
 	}
 	
+	// if we have made it to this point, it means we are out of moves. Game Over.
 	if (kingInCheck != nullptr) {
 		checkmate = true;
 	}
