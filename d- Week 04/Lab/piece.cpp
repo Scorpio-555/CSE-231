@@ -1,5 +1,6 @@
 #include "piece.h"
 #include "game.h"
+#include <cassert>
 
 bool Piece::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck)
 {
@@ -27,21 +28,20 @@ bool Piece::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck
 
 bool Piece::move(Point newPosition)
 {
-    /*bool moveFound = false;
+    bool moveFound = false;
 
     for (Point point : getPossibleMoves()) {
-        if (newPosition.getInt() == point.getInt()) {
+        if (newPosition == point) {
             moveFound = true;
         }
     }
 
     if (moveFound) {
-        Piece* target = Game::getPieceAt(newPosition);
-        bool targetIsEmpty = (target == nullptr);
+        Piece* piece = Game::getPieceAt(newPosition);
 
-        if (targetIsEmpty == false) {
-            if (target->getName() != Name::KING) {
-                target->kill();
+        if (piece != nullptr) {
+            if (piece->getName() != Name::KING) {
+                piece->kill();
             }
             else {
                 return false;
@@ -53,8 +53,64 @@ bool Piece::move(Point newPosition)
         return true;
     }
 
-    return false;*/
+    return false;
+}
 
-    position = newPosition;
-    return true;
+set<int> SlidingPiece::getAttackSquares()
+{
+    set<int> attackSquares = set<int>();
+
+    for (Point move : moveList) {
+        Point point = position + move;
+        bool done = false;
+        bool checkingKing = false;
+        Piece* piece;
+
+        while (!done) {
+            piece = Game::getPieceAt(point);
+
+            if (checkingKing) {
+                done = true;
+            }
+
+            if (point.inBounds() == false) {						// hit the edge of board
+                done = true;
+            }
+            else if (piece != nullptr && checkingKing == false) {	// came across a game piece
+                checkingKing = (piece->getName() == Name::KING && piece->getColor() != color);
+                done = !checkingKing;
+                attackSquares.insert(point.getInt());
+                point = point + move;
+            }
+            else {													// found an empty game square
+                attackSquares.insert(point.getInt());
+                point = point + move;
+            }
+        }
+    }
+
+	return attackSquares;
+}
+
+list<Point> SlidingPiece::getPossibleMoves()
+{
+    list<Point> possible;
+    bool guardingKing = Game::amIGuardingKing(getPosition());
+    bool inCheck = Game::inCheck(color);
+
+    for (Point move : moveList) {
+        Point point = position;
+        Piece* piece;
+        do {
+            point = point + move;
+            piece = Game::getPieceAt(point);
+            if (jeopardizeKing(point, guardingKing, inCheck) == false) {
+                if (piece == nullptr || piece->getColor() != color) {
+                    possible.push_back(point);
+                }
+            }
+        } while (point.inBounds() && piece == nullptr);
+    }
+
+	return possible;
 }
