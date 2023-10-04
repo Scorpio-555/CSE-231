@@ -65,8 +65,8 @@ bool Pawn::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck)
     }
 }
 
-/*bool Pawn::move(Point newPosition)
-{
+bool Pawn::move(Point newPosition)
+{/*
 	bool moveFound = false;
 
     for (Point point : getPossibleMoves()) {
@@ -95,12 +95,23 @@ bool Pawn::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck)
         return true;
     }
 
-    return false;
-}*/
+    return false;*/
+    position = newPosition;
+    return true;
+}
 
 set<int> Pawn::getAttackSquares()
 {
-	return set<int>();
+    Point point = position;
+    set<int> attackSquares = set<int>();
+    list<Point> moves = { Point(-1, forwardBy), Point(1, forwardBy) };
+    for (Point move : moves) {
+        point = point + move;
+        if (point.inBounds()) {
+            attackSquares.insert(point.getInt());
+        }
+    }
+	return attackSquares;
 }
 
 list<Point> Pawn::getPossibleMoves()
