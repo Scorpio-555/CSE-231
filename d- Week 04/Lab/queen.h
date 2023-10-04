@@ -2,12 +2,10 @@
 
 #pragma once
 
-class Queen : public Piece
+class Queen : public SlidingPiece
 {
 public:
 	Queen(Color color, Point position);
-	set<int> getAttackSquares();
-	list<Point> getPossibleMoves();
 	void draw();
 };
 
