@@ -2,14 +2,13 @@
 
 #pragma once
 
-class Rook : public Piece
+class Rook : public SlidingPiece
 {
 public:
 	Rook(Color color, Point position);
-	set<int> getAttackSquares();
-	list<Point> getPossibleMoves();
 	bool getHasMoved() { return hasMoved; }
 	void castle() { position = castlePosition; hasMoved = true; }
+	bool move(Point newPosition);
 	void draw();
 private:
 	bool hasMoved;
