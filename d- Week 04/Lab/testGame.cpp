@@ -241,12 +241,14 @@ void TestGame::testInCheck()
 void TestGame::testIsEndGame()
 {
 	// SETUP
-	Piece* king = new King(Color::WHITE, Point(4, 0));
+	Piece* kingW = new King(Color::WHITE, Point(4, 0));
+	Piece* kingB = new King(Color::BLACK, Point(4, 7));
 	Piece* pawnW = new Pawn(Color::WHITE, Point(7, 5));
 	Piece* pawnB = new Pawn(Color::BLACK, Point(7, 6));
 	Piece* rook0 = new Rook(Color::BLACK, Point(0, 0));
 	Piece* rook1 = new Rook(Color::BLACK, Point(0, 2));
-	Game::addPiece(king);
+	Game::addPiece(kingW);
+	Game::addPiece(kingB);
 	Game::addPiece(pawnW);
 	Game::addPiece(pawnB);
 	Game::addPiece(rook0);
