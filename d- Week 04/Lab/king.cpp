@@ -10,7 +10,25 @@ King::King(Color color, Point point) {
 }
 
 set<int> King::getAttackSquares() {
-    return set<int>();
+    set<int> attackSquares = set<int>();
+
+    list<Point> moves =
+    {
+        Point(-1, 1),  Point(0, 1),  Point(1, 1),
+        Point(-1, 0),                Point(1, 0),
+        Point(-1, -1), Point(0, -1), Point(1, -1)
+    };
+
+    Point point = position;
+
+    for (Point move : moves) {
+        point = point + move;
+        if (point.inBounds()) {
+            attackSquares.insert(point.getInt());
+        }
+    }
+
+    return attackSquares;
 }
 
 list<Point> King::getPossibleMoves() {
