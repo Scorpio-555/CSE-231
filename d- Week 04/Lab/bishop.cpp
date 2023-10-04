@@ -1,4 +1,5 @@
 #include "bishop.h"
+#include "game.h"
 
 Bishop::Bishop(Color color, Point position)
 {
@@ -6,16 +7,12 @@ Bishop::Bishop(Color color, Point position)
 	alive = true;
 	this->color = color;
 	this->position = position;
-}
+	moveList =
+	{
+		Point(-1, 1),				Point(1,  1),
 
-set<int> Bishop::getAttackSquares()
-{
-	return set<int>();
-}
-
-list<Point> Bishop::getPossibleMoves()
-{
-	return list<Point>();
+		Point(-1, -1),              Point(1, -1)
+	};
 }
 
 void Bishop::draw()
