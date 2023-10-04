@@ -35,3 +35,11 @@ protected:
 	Point position;
 	bool alive;
 };
+
+class SlidingPiece : public Piece{
+public:
+	virtual set<int> getAttackSquares();
+	virtual list<Point> getPossibleMoves();
+protected:
+	list<Point> moveList;
+};
