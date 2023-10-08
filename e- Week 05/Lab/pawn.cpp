@@ -1,5 +1,6 @@
 #include "pawn.h"
 #include "game.h"
+#include "queen.h"
 
 Point Pawn::potentialEnPassant = Point(-1, -1);
 
@@ -66,47 +67,44 @@ bool Pawn::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck)
 }
 
 bool Pawn::move(Point newPosition)
-{/*
-	bool moveFound = false;
+{
+	Point oldPosition = position;
+    Piece* target = Game::getPieceAt(newPosition);
+    bool emptyTarget = (target == nullptr);
+    bool moveSuccessful = Piece::move(newPosition);
 
-    for (Point point : getPossibleMoves()) {
-        if (newPosition.getInt() == point.getInt()) {
-            moveFound = true;
+    if(moveSuccessful){
+        // if we moved diagonally into an empty square, kill via en passant
+        if (position.getX() != oldPosition.getX() && emptyTarget) {
+            Piece* enemyPawn = Game::getPieceAt(potentialEnPassant);
+            enemyPawn->kill();
+        }
+
+        // if we moved two squares, there is a potential for opponent en passant
+        if (abs(position.getY() - oldPosition.getY()) == 2) {
+            potentialEnPassant = position;
+        }
+        // en passant was either performed or forfeit. It's no longer an option
+        else {
+            resetPotentialEnPassant();
+        }
+
+        // promotion
+        if (position.getY() == lastRank) {
+            kill();
+            Game::addPiece(new Queen(color, position));
         }
     }
 
-    if (moveFound) {
-        Piece* target = Game::getPieceAt(newPosition);
-        bool targetIsEmpty = (target == nullptr);
-
-        if (targetIsEmpty == false) {
-            if (target->getName() != Name::KING) {
-                target->kill();
-            }
-            else {
-                return false;
-            }
-        }
-
-        position = newPosition;
-
-        // for promotion, FIRST call pawn.kill() THEN addPiece(Queen)
-
-        return true;
-    }
-
-    return false;*/
-    position = newPosition;
-    return true;
+    return moveSuccessful;
 }
 
 set<int> Pawn::getAttackSquares()
 {
-    Point point = position;
     set<int> attackSquares = set<int>();
     list<Point> moves = { Point(-1, forwardBy), Point(1, forwardBy) };
     for (Point move : moves) {
-        point = point + move;
+        Point point = position + move;
         if (point.inBounds()) {
             attackSquares.insert(point.getInt());
         }
@@ -116,7 +114,68 @@ set<int> Pawn::getAttackSquares()
 
 list<Point> Pawn::getPossibleMoves()
 {
-    return list<Point>();
+    list<Point> possible = list<Point>();
+    bool guardingKing = Game::amIGuardingKing(position);
+    bool inCheck = Game::inCheck(color);
+
+    Point point = position;
+    point.addY(forwardBy);
+    bool oneBlankSpace = (Game::getPieceAt(point) == nullptr);
+
+    // if the square ahead of us is safe and available
+    if (oneBlankSpace && jeopardizeKing(point, guardingKing, inCheck) == false) {
+        possible.push_back(point);
+    }
+
+    // if we are in starting position
+    if (position.getY() == firstRank) {
+        point = position;
+        point.addY(forwardBy * 2);
+
+        bool twoBlankSpaces = oneBlankSpace && Game::getPieceAt(point) == nullptr;
+
+        // if two squares ahead are safe and available
+        if (twoBlankSpaces && jeopardizeKing(point, guardingKing, inCheck) == false) {
+            possible.push_back(point);
+        }
+    }
+
+    // attack moves
+    Point upLeft = position + Point(-1, forwardBy);
+    Piece* upLeftPiece = Game::getPieceAt(upLeft);
+
+    Point upRight = position + Point(1, forwardBy);
+    Piece* upRightPiece = Game::getPieceAt(upRight);
+
+    // attack normal, NW direction
+    if (upLeftPiece != nullptr && upLeftPiece->getColor() != color && jeopardizeKing(upLeft, guardingKing, inCheck) == false) {
+        possible.push_back(upLeft);
+    }
+
+    // attack normal, NE direction
+    if (upRightPiece != nullptr && upRightPiece->getColor() != color && jeopardizeKing(upRight, guardingKing, inCheck) == false) {
+        possible.push_back(upRight);
+    }
+
+    // en passant
+    if (position.getY() == enPassantRank) {
+        Piece* leftPiece = Game::getPieceAt(position + Point(-1, 0));
+        Piece* rightPiece = Game::getPieceAt(position + Point(1, 0));
+
+        if (leftPiece != nullptr && leftPiece->getPosition() == potentialEnPassant && 
+            jeopardizeKing(upLeft, guardingKing, inCheck) == false) {
+            possible.push_back(upLeft);
+        }
+
+        if (rightPiece != nullptr && rightPiece->getPosition() == potentialEnPassant &&
+            jeopardizeKing(upRight, guardingKing, inCheck) == false) {
+            possible.push_back(upRight);
+        }
+    }
+   
+    // promotion is handled in the move method
+
+    return possible;
 }
 
 void Pawn::draw()
