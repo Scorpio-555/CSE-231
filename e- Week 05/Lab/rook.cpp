@@ -1,6 +1,5 @@
 #include "rook.h"
 #include "game.h"
-#include <cassert>
 
 Rook::Rook(Color color, Point position)
 {
@@ -16,11 +15,11 @@ Rook::Rook(Color color, Point position)
 		castlePosition = Point(5, position.getY());
 	}
 
-	moveList = 
+	moveList =
 	{
-			        Point(0,  1),
+					Point(0,  1),
 		Point(-1, 0),			Point(1, 0),
-		    	    Point(0, -1)
+					Point(0, -1)
 	};
 }
 
@@ -35,4 +34,6 @@ bool Rook::move(Point newPosition)
 
 void Rook::draw()
 {
+	ogstream gout;
+	gout.drawRook(position.getInt(), color == Color::BLACK);
 }
