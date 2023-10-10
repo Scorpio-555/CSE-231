@@ -21,7 +21,7 @@ set<int> Knight::getAttackSquares()
 		Point(-2, -1),				   		   Point(2, -1),
 				 Point(-1, -2),		  Point(1, -2)
 	};
-	
+
 	for (Point move : moves) {
 		Point point = position + move;
 		if (point.inBounds()) {
@@ -53,4 +53,6 @@ list<Point> Knight::getPossibleMoves()
 
 void Knight::draw()
 {
+	ogstream gout;
+	gout.drawKnight(position.getInt(), color == Color::BLACK);
 }
