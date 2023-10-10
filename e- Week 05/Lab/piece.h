@@ -3,6 +3,7 @@
 #include <set>
 #include "enum.h"
 #include "point.h"
+#include "uiDraw.h"
 
 #pragma once
 
@@ -36,7 +37,7 @@ protected:
 	bool alive;
 };
 
-class SlidingPiece : public Piece{
+class SlidingPiece : public Piece {
 public:
 	virtual set<int> getAttackSquares();
 	virtual list<Point> getPossibleMoves();
