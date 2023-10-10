@@ -4,8 +4,10 @@
 
 bool Piece::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck)
 {
+    set<int> checkingPath = Game::getCheckingPath();
+
     // we either aren't in check, or we want to move to a square that gets us out of check
-    if (inCheck == false || Game::getCheckingPath().find(newPosition.getInt()) != Game::getCheckingPath().end()) {
+    if (inCheck == false || checkingPath.find(newPosition.getInt()) != checkingPath.end()) {
         // our movement has the potential to put the king in check
         if (iAmGuardingKing) {
             Point kingPoint = Game::getKing(color)->getPosition();
@@ -13,7 +15,12 @@ bool Piece::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck
             Point directionAwayFromKing = Game::getDirection(kingPoint, position);
             Point desiredDirection = Game::getDirection(position, newPosition);
             // we can only move directly toward the king, or directly away, otherwise we will put the king in check
-            return (desiredDirection == directionToKing || desiredDirection == directionAwayFromKing);
+            if (desiredDirection == directionToKing || desiredDirection == directionAwayFromKing) {
+                return false;
+            }
+            else {
+                return true;
+            }
         }
         // we have no potential to put the king in check
         else {
@@ -89,12 +96,12 @@ set<int> SlidingPiece::getAttackSquares()
         }
     }
 
-	return attackSquares;
+    return attackSquares;
 }
 
 list<Point> SlidingPiece::getPossibleMoves()
 {
-    list<Point> possible;
+    list<Point> possible = list<Point>();
     bool guardingKing = Game::amIGuardingKing(getPosition());
     bool inCheck = Game::inCheck(color);
 
@@ -105,12 +112,12 @@ list<Point> SlidingPiece::getPossibleMoves()
             point = point + move;
             piece = Game::getPieceAt(point);
             if (jeopardizeKing(point, guardingKing, inCheck) == false) {
-                if (piece == nullptr || piece->getColor() != color) {
+                if ((piece == nullptr || piece->getColor() != color) && point.inBounds()) {
                     possible.push_back(point);
                 }
             }
         } while (point.inBounds() && piece == nullptr);
     }
 
-	return possible;
+    return possible;
 }
