@@ -17,4 +17,6 @@ Queen::Queen(Color color, Point position)
 
 void Queen::draw()
 {
+	ogstream gout;
+	gout.drawQueen(position.getInt(), color == Color::BLACK);
 }
