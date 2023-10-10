@@ -27,7 +27,7 @@ public:
     // getters
     int getX()       const { return x; }
     int getY()       const { return y; }
-    int getInt()     const { return y * 8 + x; }
+    int getInt()     const { if (inBounds()) { return y * 8 + x; } return -1; }
 
     // setters
     void setX(int x) { this->x = x; }
@@ -35,9 +35,9 @@ public:
     void addX(int dx) { setX(getX() + dx); }
     void addY(int dy) { setY(getY() + dy); }
 
-    bool inBounds() { return x >= 0 && x <= 7 && y >=0 && y <= 7; }
-    bool operator == (const Point& pt) { return pt.getInt() == getInt(); }
-    bool operator != (const Point& pt) { return pt.getInt() != getInt(); }
+    bool inBounds() const { return x >= 0 && x <= 7 && y >= 0 && y <= 7; }
+    bool operator == (const Point& pt) { return (pt.x == x && pt.y == y); }
+    bool operator != (const Point& pt) { return (pt.x != x || pt.y != y); }
     Point operator + (const Point& pt) { return Point(x + pt.getX(), y + pt.getY()); }
 
 private:
@@ -48,3 +48,5 @@ private:
 // stream I/O useful for debugging
 std::ostream& operator << (std::ostream& out, const Point& pt);
 std::istream& operator >> (std::istream& in, Point& pt);
+
+
