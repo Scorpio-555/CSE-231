@@ -17,4 +17,6 @@ Bishop::Bishop(Color color, Point position)
 
 void Bishop::draw()
 {
+	ogstream gout;
+	gout.drawBishop(position.getInt(), color == Color::BLACK);
 }
