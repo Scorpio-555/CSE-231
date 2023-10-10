@@ -106,13 +106,15 @@ list<Point> King::getPossibleMoves() {
 
 void King::draw()
 {
+    ogstream gout;
+    gout.drawKing(position.getInt(), color == Color::BLACK);
 }
 
 bool King::move(Point newPosition)
 {
     Point oldPosition = position;
     bool moveSuccessful = Piece::move(newPosition);
-    bool castling = ( abs(position.getX() - oldPosition.getX()) == 2 );
+    bool castling = (abs(position.getX() - oldPosition.getX()) == 2);
 
     if (moveSuccessful) {
         hasMoved = true;
