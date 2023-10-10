@@ -28,23 +28,23 @@ Pawn::Pawn(Color color, Point position)
 bool Pawn::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck)
 {
     Piece* target = Game::getPieceAt(newPosition);
-    Piece* behindEnPassant = Game::getPieceAt(Point(newPosition.getX(), newPosition.getY() - forwardBy));
+    Pawn* enPassantVictim = (Pawn*)Game::getPieceAt(potentialEnPassant);
     Piece* king = Game::getKing(color);
     set<int> checkingPath = Game::getCheckingPath();
     bool enPassant = (position.getX() != newPosition.getX() && target == nullptr);
     bool onKingsRow = (position.getY() == king->getPosition().getY());
-    bool enemyPawnChecking = (enPassant && checkingPath.find(behindEnPassant->getPosition().getInt()) != checkingPath.end());
+    bool enemyPawnChecking = (enPassant && checkingPath.find(enPassantVictim->getPosition().getInt()) != checkingPath.end());
 
     // there is a weird exception if we perform en passant and are on same row as king
     if (inCheck == false && enPassant && onKingsRow) {
-        Pawn* enemyPawn = (Pawn*)behindEnPassant;
-        enemyPawn->kill();
+        //Pawn* enemyPawn = (Pawn*)enPassantVictim;
+        enPassantVictim->kill();
         iAmGuardingKing = Game::amIGuardingKing(position);
-        enemyPawn->resurrect();
+        enPassantVictim->resurrect();
     }
 
     // we either aren't in check, or we want to move to a square that gets us out of check
-    if (inCheck == false || checkingPath.find(newPosition.getInt()) != checkingPath.end() || enemyPawnChecking) { 
+    if (inCheck == false || checkingPath.find(newPosition.getInt()) != checkingPath.end() || enemyPawnChecking) {
 
         // our movement has the potential to put the king in check
         if (iAmGuardingKing) {
@@ -53,7 +53,12 @@ bool Pawn::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck)
             Point directionAwayFromKing = Game::getDirection(kingPoint, position);
             Point desiredDirection = Game::getDirection(position, newPosition);
             // we can only move directly toward the king, or directly away, otherwise we will put the king in check
-            return (desiredDirection == directionToKing || desiredDirection == directionAwayFromKing);
+            if (desiredDirection == directionToKing || desiredDirection == directionAwayFromKing) {
+                return false;
+            }
+            else {
+                return true;
+            }
         }
         // we have no potential to put the king in check
         else {
@@ -68,12 +73,12 @@ bool Pawn::jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck)
 
 bool Pawn::move(Point newPosition)
 {
-	Point oldPosition = position;
+    Point oldPosition = position;
     Piece* target = Game::getPieceAt(newPosition);
     bool emptyTarget = (target == nullptr);
     bool moveSuccessful = Piece::move(newPosition);
 
-    if(moveSuccessful){
+    if (moveSuccessful) {
         // if we moved diagonally into an empty square, kill via en passant
         if (position.getX() != oldPosition.getX() && emptyTarget) {
             Piece* enemyPawn = Game::getPieceAt(potentialEnPassant);
@@ -109,7 +114,7 @@ set<int> Pawn::getAttackSquares()
             attackSquares.insert(point.getInt());
         }
     }
-	return attackSquares;
+    return attackSquares;
 }
 
 list<Point> Pawn::getPossibleMoves()
@@ -148,13 +153,17 @@ list<Point> Pawn::getPossibleMoves()
     Piece* upRightPiece = Game::getPieceAt(upRight);
 
     // attack normal, NW direction
-    if (upLeftPiece != nullptr && upLeftPiece->getColor() != color && jeopardizeKing(upLeft, guardingKing, inCheck) == false) {
-        possible.push_back(upLeft);
+    if (upLeft.inBounds()) {
+        if (upLeftPiece != nullptr && upLeftPiece->getColor() != color && jeopardizeKing(upLeft, guardingKing, inCheck) == false) {
+            possible.push_back(upLeft);
+        }
     }
 
     // attack normal, NE direction
-    if (upRightPiece != nullptr && upRightPiece->getColor() != color && jeopardizeKing(upRight, guardingKing, inCheck) == false) {
-        possible.push_back(upRight);
+    if (upRight.inBounds()) {
+        if (upRightPiece != nullptr && upRightPiece->getColor() != color && jeopardizeKing(upRight, guardingKing, inCheck) == false) {
+            possible.push_back(upRight);
+        }
     }
 
     // en passant
@@ -162,7 +171,7 @@ list<Point> Pawn::getPossibleMoves()
         Piece* leftPiece = Game::getPieceAt(position + Point(-1, 0));
         Piece* rightPiece = Game::getPieceAt(position + Point(1, 0));
 
-        if (leftPiece != nullptr && leftPiece->getPosition() == potentialEnPassant && 
+        if (leftPiece != nullptr && leftPiece->getPosition() == potentialEnPassant &&
             jeopardizeKing(upLeft, guardingKing, inCheck) == false) {
             possible.push_back(upLeft);
         }
@@ -172,7 +181,7 @@ list<Point> Pawn::getPossibleMoves()
             possible.push_back(upRight);
         }
     }
-   
+
     // promotion is handled in the move method
 
     return possible;
@@ -180,4 +189,6 @@ list<Point> Pawn::getPossibleMoves()
 
 void Pawn::draw()
 {
+    ogstream gout;
+    gout.drawPawn(position.getInt(), color == Color::BLACK);
 }
