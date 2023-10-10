@@ -6,11 +6,11 @@ class Pawn : public Piece
 {
 public:
 	Pawn(Color color, Point point);
-	
+
 	set<int> getAttackSquares();
 	list<Point> getPossibleMoves();
 
-	static void resetEnPotentialEnPassant() { potentialEnPassant = Point(-1,-1); }
+	static void resetPotentialEnPassant() { potentialEnPassant = Point(-1, -1); }
 
 	bool jeopardizeKing(Point newPosition, bool iAmGuardingKing, bool inCheck);
 	bool move(Point newPosition);
