@@ -5,7 +5,6 @@
 #include "knight.h"
 #include "bishop.h"
 #include "queen.h"
-#include <cassert>
 
 list<Piece*> Game::pieces = list<Piece*>();
 Color Game::currentTurnHolder = Color::WHITE;
@@ -76,14 +75,25 @@ bool Game::amIGuardingKing(Point piecePoint)
 	Piece* king = getKing(piece->getColor());
 	Point kingPoint = king->getPosition();
 	Point enemyDirection = getDirection(kingPoint, piecePoint);
-	
+
 	if (enemyDirection == Point()) {	// piece and king are not lined up
 		return false;
 	}
 	else {
-		// now that we know we can draw a straight line from piece to king, check if bad guy is also on that line
+		// now we know we can draw straight line from peice to king, check if there's only empty squares btwn the two
+		Point point = kingPoint + enemyDirection;
+		while (point != piecePoint) {
+			// if we bumped into someone other than the piece in question, the piece in question isn't guarding!
+			if (Game::getPieceAt(point) != nullptr) {
+				return false;
+			}
+
+			point = point + enemyDirection;
+		}
+
+		// now that we know there's only empty squares btwn piece & king, check if piece is btwn king & bad guy
 		bool done = false;
-		Point point = piecePoint + enemyDirection;
+		point = piecePoint + enemyDirection;
 		Piece* potentialBadGuy = nullptr;
 		while (!done) {
 			potentialBadGuy = getPieceAt(point);
@@ -134,7 +144,7 @@ bool Game::amIGuardingKing(Point piecePoint)
 		else {
 			return false;
 		}
-	} 
+	}
 }
 
 Point Game::getDirection(Point startingPoint, Point secondPoint) {
@@ -148,7 +158,7 @@ Point Game::getDirection(Point startingPoint, Point secondPoint) {
 		return Point();
 	}
 	else {
-		int x = 0;		
+		int x = 0;
 		if (deltaX != 0) {
 			x = deltaX / abs(deltaX);	// normalize so that the magnitude of x is 1
 		}
@@ -171,14 +181,37 @@ bool Game::movePiece(Point from, Point to)
 	}
 
 	if (piece->getName() != Name::PAWN) {
-		Pawn::resetEnPotentialEnPassant();
+		Pawn::resetPotentialEnPassant();
 	}
 
 	return piece->move(to);
 }
 
-void Game::draw(Point hoverPos, Point selectPos)
+void Game::draw(int hoverPos, int selectPos)
 {
+	ogstream gout;
+
+	// draw the checkerboard
+	gout.drawBoard();
+
+	// draw any selections
+	gout.drawHover(hoverPos);
+	gout.drawSelected(selectPos);
+
+	// draw the possible moves
+	Piece* piece = getPieceAt(Point(selectPos));
+	if (piece != nullptr) {
+		for (Point point : piece->getPossibleMoves()) {
+			gout.drawPossible(point.getInt());
+		}
+	}
+
+	// draw the pieces
+	for (Piece* p : pieces) {
+		if (p->isAlive()) {
+			p->draw();
+		}
+	}
 }
 
 bool Game::isEndGame()
@@ -205,7 +238,7 @@ bool Game::isEndGame()
 			return false;
 		}
 	}
-	
+
 	// if we have made it to this point, it means we are out of moves. Game Over.
 	if (kingInCheck != nullptr) {
 		checkmate = true;
@@ -264,7 +297,7 @@ void Game::newGame()
 	reset();
 
 	// add white pawns
-	for (int i = 8; i < 16; i++ ) {
+	for (int i = 8; i < 16; i++) {
 		addPiece(new Pawn(Color::WHITE, Point(i)));
 	}
 
@@ -275,7 +308,7 @@ void Game::newGame()
 
 	// Rooks
 	addPiece(new Rook(Color::WHITE, Point(0, 0)));
-	addPiece(new Rook(Color::WHITE, Point(7, 0)));
+	addPiece(new Rook(Color::WHITE, Point(7, 0))); 
 	addPiece(new Rook(Color::BLACK, Point(0, 7)));
 	addPiece(new Rook(Color::BLACK, Point(7, 7)));
 
