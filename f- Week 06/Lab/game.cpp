@@ -198,15 +198,15 @@ void Game::draw(int hoverPos, int selectPos)
 	gout.drawHover(hoverPos);
 	gout.drawSelected(selectPos);
 
-	// draw a hover on the current turn holder's king
-	gout.drawHover(getKing(currentTurnHolder)->getPosition().getInt());
+	// draw a small highlight on the current turn holder's king
+	gout.drawPossible(getKing(currentTurnHolder)->getPosition().getInt());
 
-	// we also want to highlight pieces involved in check
+	// draw a "hover" around pieces involved in check
 	if (kingInCheck != nullptr) {
-		gout.drawSelected(kingInCheck->getPosition().getInt());
+		gout.drawHover(kingInCheck->getPosition().getInt());
 	}
 	for (Piece* piece : checkingPieces) {
-		gout.drawSelected(piece->getPosition().getInt());
+		gout.drawHover(piece->getPosition().getInt());
 	}
 
 	// draw the possible moves
