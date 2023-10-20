@@ -22,40 +22,41 @@ using namespace std;
  **************************************/
 void callBack(Interface *pUI, void * p)
 {
-   bool moveSuccessful = false;
+    Game game = *((Game*)p);
+    bool moveSuccessful = false;
 
    // move
    if (pUI->getPreviousPosition() != -1 && pUI->getSelectPosition() != -1) {
-       moveSuccessful = Game::movePiece(pUI->getPreviousPosition(), pUI->getSelectPosition());
+       moveSuccessful = game.movePiece(pUI->getPreviousPosition(), pUI->getSelectPosition());
    }
 
    if (moveSuccessful) {
        // wrap up this turn
        pUI->clearSelectPosition();
-       Game::removeZombies();
+       game.removeZombies();
        // now it's the next player's turn
-       Game::toggleTurnHolder();
-       Game::isEndGame();
+       game.toggleTurnHolder();
+       game.isEndGame();
    }
 
    // if we clicked on a blank spot, then it is not selected
-   if (pUI->getSelectPosition() != -1 && Game::getPieceAt(pUI->getSelectPosition()) == nullptr)
+   if (pUI->getSelectPosition() != -1 && game.getPieceAt(pUI->getSelectPosition()) == nullptr)
       pUI->clearSelectPosition();
 
    // draw the board
-   Game::draw(pUI->getHoverPosition(), pUI->getSelectPosition());
+   game.draw(pUI->getHoverPosition(), pUI->getSelectPosition());
 
    // end the game
-   if (Game::isCheckmate() || Game::isStalemate()) {
+   if (game.isCheckmate() || game.isStalemate()) {
        if (pUI->getSelectPosition() != -1) {
-           Game::newGame();
+           game.newGame();
            return;
        }
        else {
            ogstream gout;
-           if (Game::isCheckmate()) {
+           if (game.isCheckmate()) {
                gout.drawText(90, 135, "Checkmate!");
-               if (Game::getTurnHolder() == Color::WHITE) {
+               if (game.getTurnHolder() == Color::WHITE) {
                    gout.drawText(90, 100, "Black wins!");
                }
                else {
@@ -142,8 +143,11 @@ void parse(const string& textMove, int& positionFrom, int& positionTo)
  * READ FILE
  * Read a file where moves are encoded in Smith notation
  *******************************************************/
-void readFile(const char* fileName, char* board)
+void readFile(const char* fileName)
 {
+    Game game = Game();
+    game.newGame();
+
    // open the file
    ifstream fin(fileName);
    if (fin.fail())
@@ -157,7 +161,14 @@ void readFile(const char* fileName, char* board)
       int positionFrom;
       int positionTo;
       parse(textMove, positionFrom, positionTo);
-      //valid = move(board, positionFrom, positionTo);
+      valid = game.movePiece(Point(positionFrom), Point(positionTo));
+      if (valid) {
+          // wrap up this turn
+          game.removeZombies();
+          // now it's the next player's turn
+          game.toggleTurnHolder();
+          game.isEndGame();
+      }
    }
 
    // close and done
@@ -183,34 +194,22 @@ int main(int argc, char** argv)
    Interface ui("Chess");    
 
    // Initialize the game class
-   // note this is upside down: 0 row is at the bottom
-   char board[64] = {
-      'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r',
-      'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      // ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P',
-      'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'
-   };
-   Game game;
-   game.newGame();
+   Game* game = new Game();
+   game->newGame();
    
 #ifdef _WIN32
  //  int    argc;
  //  LPWSTR * argv = CommandLineToArgvW(GetCommandLineW(), &argc);
  //  string filename = argv[1];
    if (__argc == 2)
-      readFile(__argv[1], board);
+      readFile(__argv[1]);
 #else // !_WIN32
    if (argc == 2)
-      readFile(argv[1], board);
+      readFile(argv[1]);
 #endif // !_WIN32
 
    // set everything into action
-   ui.run(callBack, board);             
-
+   ui.run(callBack, game);             
+   
    return 0;
 }
