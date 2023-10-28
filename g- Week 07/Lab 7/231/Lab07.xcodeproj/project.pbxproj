@@ -29,6 +29,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		BA9ED24C2AEC8009007E16A4 /* trig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trig.h; sourceTree = "<group>"; };
 		C11C7E962578098A00EA4B2E /* Lab07 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Lab07; sourceTree = BUILT_PRODUCTS_DIR; };
 		C11C7EA225780B2100EA4B2E /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		C11C7EA325780B2100EA4B2E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -67,6 +68,7 @@
 				C11C7EAC25780B6000EA4B2E /* test.h */,
 				C11C7EAF25780B6500EA4B2E /* testPosition.h */,
 				C11C7EAD25780B6000EA4B2E /* uiDraw.cpp */,
+				BA9ED24C2AEC8009007E16A4 /* trig.h */,
 				C11C7EB025780B6500EA4B2E /* uiDraw.h */,
 				C11C7EA925780B5E00EA4B2E /* uiInteract.cpp */,
 				C11C7EA825780B5C00EA4B2E /* uiInteract.h */,
