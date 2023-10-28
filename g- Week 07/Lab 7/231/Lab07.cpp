@@ -6,9 +6,13 @@
  * 3. Assignment Description:
  *      Simulate satellites orbiting the earth
  * 4. What was the hardest part? Be as specific as possible.
- *      ??
+ *      The hardest part was realizing that ddx in the white board demo
+ *      uses sine instead of cosine, and ddy uses cosine instead of sine.
+ *      Still very confused as to why that is, but it means the difference
+ *      between shooting away from earth tangental to its surface and orbiting
+ *      the earth.
  * 5. How long did it take for you to complete the assignment?
- *      ??
+ *      1 hr 30 min
  *****************************************************************/
 
 #include <cassert>      // for ASSERT
@@ -20,6 +24,7 @@
 
 
 #define PI 3.14159265359
+#define rotation_speed (2 * PI) / 1800
 #define t 48
 #define earth_radius 6378000
 #define geo_distance 42164000
@@ -37,70 +42,51 @@ using namespace std;
 class Demo
 {
 public:
-   Demo(Position ptUpperRight) :
-      ptUpperRight(ptUpperRight)
-   {
-//      ptHubble.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-//      ptHubble.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+    Demo(Position ptUpperRight) :
+        ptUpperRight(ptUpperRight)
+    {
+        ptSputnik.setMetersX(0.0);
+        ptSputnik.setMetersY(42164000.0);
 
-       ptSputnik.setMetersX(-1.0);
-       ptSputnik.setMetersY(42164000.0);
-       
-       sputnikDx = -geo_speed;
-       sputnikDy = 0;
-       
-       sputnikHeight = Trig::distanceBetweenPoints(Position(0,0), ptSputnik) - earth_radius;
-       
-        gh = g * pow(earth_radius / (earth_radius + sputnikHeight),2);
-       
-       double newAngle = Trig::getAngle(ptSputnik.getMetersX(), ptSputnik.getMetersY());
-       
-       
-       sputnikDDx = Trig::computeSineComponent(Trig::getAngle(ptSputnik.getMetersX(), ptSputnik.getMetersY()), gh);
-       
-       sputnikDDy = Trig::computeCosineComponent(Trig::getAngle(ptSputnik.getMetersX(), ptSputnik.getMetersY()), gh);
-        
-        
-//      ptStarlink.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-//      ptStarlink.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
-//
-//      ptCrewDragon.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-//      ptCrewDragon.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
-//
-//      ptShip.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-//      ptShip.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
-//
-//      ptGPS.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-//      ptGPS.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
-//
-//      ptStar.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
-//      ptStar.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
+        sputnikDx = -geo_speed;
+        sputnikDy = 0;
 
-      angleShip = 0.0;
-      angleEarth = 0.0;
-      phaseStar = 0;
-   }
+        ptStar.setPixelsX(ptUpperRight.getPixelsX() * random(-0.5, 0.5));
+        ptStar.setPixelsY(ptUpperRight.getPixelsY() * random(-0.5, 0.5));
 
-   Position ptHubble;
-   Position ptSputnik;
-   Position ptStarlink;
-   Position ptCrewDragon;
-   Position ptShip;
-   Position ptGPS;
-   Position ptStar;
-   Position ptUpperRight;
+        angleShip = 3 * PI / 2;
+        angleEarth = 0.0;
+        phaseStar = 0;
+    }
+
+    double getHeight(Position pt) {
+        return Trig::distanceBetweenPoints(Position(0, 0), pt) - earth_radius;
+    }
+
+    double get_gH(double height) {
+        return g * pow(earth_radius / (earth_radius + height), 2);
+    }
+
+    double getDdx(Position pt) {
+        return Trig::computeSineComponent(Trig::getAngle(pt.getMetersX(), pt.getMetersY()), get_gH(getHeight(pt)));
+    }
+
+    double getDdy(Position pt) {
+        return Trig::computeCosineComponent(Trig::getAngle(ptSputnik.getMetersX(), ptSputnik.getMetersY()), get_gH(getHeight(pt)));
+    }
+
+    Position ptSputnik;
+    Position ptShip;
+    Position ptStar;
+    Position ptUpperRight;
 
     unsigned char phaseStar;
 
-    
-    double gh;
-    double sputnikHeight;
-    
     double angleShip;
     double angleEarth;
-    
-   double sputnikDx;
-   double sputnikDy;
+
+    double sputnikDx;
+    double sputnikDy;
     double sputnikDDx;
     double sputnikDDy;
 };
@@ -114,86 +100,57 @@ public:
  **************************************/
 void callBack(const Interface* pUI, void* p)
 {
-   // the first step is to cast the void pointer into a game object. This
-   // is the first step of every single callback function in OpenGL. 
-   Demo* pDemo = (Demo*)p;
+    // the first step is to cast the void pointer into a game object. This
+    // is the first step of every single callback function in OpenGL. 
+    Demo* pDemo = (Demo*)p;
 
-   //
-   // accept input
-   //
+    //
+    // accept input
+    //
 
-   // move by a little
-   if (pUI->isUp())
-      pDemo->ptShip.addPixelsY(1.0);
-   if (pUI->isDown())
-      pDemo->ptShip.addPixelsY(-1.0);
-   if (pUI->isLeft())
-      pDemo->ptShip.addPixelsX(-1.0);
-   if (pUI->isRight())
-      pDemo->ptShip.addPixelsX(1.0);
+    // move by a little
+    if (pUI->isUp())
+        pDemo->ptShip.addPixelsY(1.0);
+    if (pUI->isDown())
+        pDemo->ptShip.addPixelsY(-1.0);
+    if (pUI->isLeft())
+        pDemo->ptShip.addPixelsX(-1.0);
+    if (pUI->isRight())
+        pDemo->ptShip.addPixelsX(1.0);
 
 
-   //
-   // perform all the game logic
-   //
+    //
+    // perform all the game logic
+    //
 
-   // rotate the earth
-    pDemo->angleEarth -= (2 * PI ) / 1800;
-    
-    pDemo->sputnikDDx = Trig::computeSineComponent(Trig::getAngle(pDemo->ptSputnik.getMetersX(), pDemo->ptSputnik.getMetersY()), pDemo->gh);
-    
-    pDemo->sputnikDDy = Trig::computeCosineComponent(Trig::getAngle(pDemo->ptSputnik.getMetersX(), pDemo->ptSputnik.getMetersY()), pDemo->gh);
-    
-    pDemo->sputnikDx += pDemo->sputnikDDx * t;
-    pDemo->sputnikDy += pDemo->sputnikDDy * t;
-    pDemo->ptSputnik.addMetersX(pDemo->sputnikDDx * t);
-    pDemo->ptSputnik.addMetersY(pDemo->sputnikDDy * t);
-   pDemo->angleShip += 0.02;
-   //pDemo->phaseStar++;
+    // rotate the earth
+    pDemo->angleEarth -= rotation_speed;
 
-   //
-   // draw everything
-   //
+    double ddx = pDemo->getDdx(pDemo->ptSputnik);
+    double ddy = pDemo->getDdy(pDemo->ptSputnik);
 
-   Position pt;
-   ogstream gout(pt);
+    pDemo->sputnikDx += ddx * t;
+    pDemo->sputnikDy += ddy * t;
+    pDemo->ptSputnik.addMetersX(pDemo->sputnikDx * t);
+    pDemo->ptSputnik.addMetersY(pDemo->sputnikDy * t);
+    pDemo->angleShip -= rotation_speed;
+    pDemo->phaseStar++;
 
-   // draw satellites
-//   gout.drawCrewDragon(pDemo->ptCrewDragon, pDemo->angleShip);
-//   gout.drawHubble    (pDemo->ptHubble,     pDemo->angleShip);
-   gout.drawSputnik   (pDemo->ptSputnik,    pDemo->angleShip);
-//   gout.drawStarlink  (pDemo->ptStarlink,   pDemo->angleShip);
-//   gout.drawShip      (pDemo->ptShip,       pDemo->angleShip, pUI->isSpace());
-//   gout.drawGPS       (pDemo->ptGPS,        pDemo->angleShip);
+    //
+    // draw everything
+    //
 
-//   // draw parts
-//   pt.setPixelsX(pDemo->ptCrewDragon.getPixelsX() + 20);
-//   pt.setPixelsY(pDemo->ptCrewDragon.getPixelsY() + 20);
-//   gout.drawCrewDragonRight(pt, pDemo->angleShip); // notice only two parameters are set
-//   pt.setPixelsX(pDemo->ptHubble.getPixelsX() + 20);
-//   pt.setPixelsY(pDemo->ptHubble.getPixelsY() + 20);
-//   gout.drawHubbleLeft(pt, pDemo->angleShip);      // notice only two parameters are set
-//   pt.setPixelsX(pDemo->ptGPS.getPixelsX() + 20);
-//   pt.setPixelsY(pDemo->ptGPS.getPixelsY() + 20);
-//   gout.drawGPSCenter(pt, pDemo->angleShip);       // notice only two parameters are set
-//   pt.setPixelsX(pDemo->ptStarlink.getPixelsX() + 20);
-//   pt.setPixelsY(pDemo->ptStarlink.getPixelsY() + 20);
-//   gout.drawStarlinkArray(pt, pDemo->angleShip);   // notice only two parameters are set
+    Position pt;
+    ogstream gout(pt);
 
-//   // draw fragments
-//   pt.setPixelsX(pDemo->ptSputnik.getPixelsX() + 20);
-//   pt.setPixelsY(pDemo->ptSputnik.getPixelsY() + 20);
-//   gout.drawFragment(pt, pDemo->angleShip);
-//   pt.setPixelsX(pDemo->ptShip.getPixelsX() + 20);
-//   pt.setPixelsY(pDemo->ptShip.getPixelsY() + 20);
-//   gout.drawFragment(pt, pDemo->angleShip);
+    gout.drawSputnik(pDemo->ptSputnik, pDemo->angleShip);
 
-//   // draw a single star
-//   gout.drawStar(pDemo->ptStar, pDemo->phaseStar);
+    // draw a single star
+    gout.drawStar(pDemo->ptStar, pDemo->phaseStar);
 
-   // draw the earth
-   pt.setMeters(0.0, 0.0);
-   gout.drawEarth(pt, pDemo->angleEarth);
+    // draw the earth
+    pt.setMeters(0.0, 0.0);
+    gout.drawEarth(pt, pDemo->angleEarth);
 }
 
 double Position::metersFromPixels = 40.0;
@@ -204,29 +161,29 @@ double Position::metersFromPixels = 40.0;
 #ifdef _WIN32_X
 #include <windows.h>
 int WINAPI wWinMain(
-   _In_ HINSTANCE hInstance,
-   _In_opt_ HINSTANCE hPrevInstance,
-   _In_ PWSTR pCmdLine,
-   _In_ int nCmdShow)
+    _In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ PWSTR pCmdLine,
+    _In_ int nCmdShow)
 #else // !_WIN32
 int main(int argc, char** argv)
 #endif // !_WIN32
 {
-   // Initialize OpenGL
-   Position ptUpperRight;
-   ptUpperRight.setZoom(128000.0 /* 128km equals 1 pixel */);
-   ptUpperRight.setPixelsX(1000.0);
-   ptUpperRight.setPixelsY(1000.0);
-   Interface ui(0, NULL,
-      "Demo",   /* name on the window */
-      ptUpperRight);
+    // Initialize OpenGL
+    Position ptUpperRight;
+    ptUpperRight.setZoom(128000.0 /* 128km equals 1 pixel */);
+    ptUpperRight.setPixelsX(1000.0);
+    ptUpperRight.setPixelsY(1000.0);
+    Interface ui(0, NULL,
+        "Demo",   /* name on the window */
+        ptUpperRight);
 
-   // Initialize the demo
-   Demo demo(ptUpperRight);
+    // Initialize the demo
+    Demo demo(ptUpperRight);
 
-   // set everything into action
-   ui.run(callBack, &demo);
+    // set everything into action
+    ui.run(callBack, &demo);
 
 
-   return 0;
+    return 0;
 }
