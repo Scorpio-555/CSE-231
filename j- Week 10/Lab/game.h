@@ -22,12 +22,12 @@ public:
 	static void advance();
 	static void checkCollisions();
 	static void removeZombies();
-	static void addMobile(Mobile mobile);
+	static void addMobile(Mobile* mobile);
 	static void killShip();
 
 private:
 	static double timeInterval;
 	static Earth earth;
 	static Ship* ship;
-	static list<Mobile> mobileList;
+	static list<Mobile*> mobileList;
 };
