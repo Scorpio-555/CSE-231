@@ -31,8 +31,8 @@ void TestGame::testGetTimeInterval()
 	double t = Game::getTimeInterval();
 
 	// VERIFY
-
 	assert(TIME_INTERVAL == t);
+
 }	// TEARDOWN
 
 void TestGame::testGetEarthRadius()
@@ -71,43 +71,45 @@ void TestGame::testGetEarthRotationSpeed()
 void TestGame::testAddMobile()
 {
 	// SETUP
-	Mobile m = Mobile(Position(1.0, 1.0), 0.0, 0.0);
+	Mobile* m = new Mobile(Position(1.0, 1.0), 0.0, 0.0);
 
 	// EXERCISE
 	Game::addMobile(m);
 
 	// VERIFY
 	assert(Game::mobileList.size() == 1);
-	assert(Game::mobileList.front().getPosition() == Position(1.0, 1.0));
+	assert(Game::mobileList.front()->getPosition() == Position(1.0, 1.0));
 
 	// TEARDOWN
-	Game::mobileList = list<Mobile>();
-}	
+	Game::mobileList = list<Mobile*>();
+	delete m;
+}
 
 void TestGame::testAdvance()
 {
 	// SETUP
-	Mobile m = Mobile(Position(0.0, 42164000), -3100, 0.0);
+	Mobile* m = new Mobile(Position(0.0, 42164000), -3100, 0.0);
 	Game::addMobile(m);
 
 	// EXERCISE
 	Game::advance();
-	int x = (int)Game::mobileList.front().getPosition().getMetersX();
-	int y = (int)Game::mobileList.front().getPosition().getMetersY();
+	int x = (int)Game::mobileList.front()->getPosition().getMetersX();
+	int y = (int)Game::mobileList.front()->getPosition().getMetersY();
 
 	// VERIFY
 	assert(x == -148800);
 	assert(y == 42163482);
 
 	// TEARDOWN
-	Game::mobileList = list<Mobile>();
-}	
+	Game::mobileList = list<Mobile*>();
+	delete m;
+}
 
 void TestGame::testCheckCollisions()
 {
 	// SETUP
 	Sputnik* sputnik = new Sputnik(Position(0.0, 10000000), 0.0, 0.0);		// Sputnik and GPS are 10.0m apart, radii add up to 16
-	GPS* gps = new GPS(Position(10.0, 10000000), 0.0, 0.0);					
+	GPS* gps = new GPS(Position(10.0, 10000000), 0.0, 0.0);
 	Hubble* hubble = new Hubble(Position(-20.0, 10000000), 0.0, 0.0);		// Hubble and Dragon 17.0m apart, radii add up to 17
 	Dragon* dragon = new Dragon(Position(-37.0, 10000000), 0.0, 0.0);
 	Starlink* starlink = new Starlink(Position(0.0, 6378006), 0.0, 0.0);	// starlink and earth, radii add up to 6378006
@@ -115,12 +117,12 @@ void TestGame::testCheckCollisions()
 	GPScenter* piece = new GPScenter(Position(30.0, 10000000), 0.0, 0.0);	// this satellite piece is the only object safe from collision
 																			// the piece and GPS are 20.0m apart, radii add up to 19.0
 
-	Game::addMobile(*sputnik);
-	Game::addMobile(*gps);
-	Game::addMobile(*hubble);
-	Game::addMobile(*dragon);
-	Game::addMobile(*starlink);
-	Game::addMobile(*piece);
+	Game::addMobile(sputnik);
+	Game::addMobile(gps);
+	Game::addMobile(hubble);
+	Game::addMobile(dragon);
+	Game::addMobile(starlink);
+	Game::addMobile(piece);
 
 	// EXERCISE
 	Game::checkCollisions();
@@ -134,7 +136,7 @@ void TestGame::testCheckCollisions()
 	assert(piece->isAlive() == true);
 
 	// TEARDOWN
-	Game::mobileList = list<Mobile>();
+	Game::mobileList = list<Mobile*>();
 	delete sputnik;
 	delete gps;
 	delete hubble;
@@ -151,14 +153,14 @@ void TestGame::testKillShip()
 
 	// EXERCISE
 	ship->kill();	// ship->kill() should call Game::killShip(), which sets Game::ship to nullptr
-
+	
 	// VERIFY
 	assert(Game::ship == nullptr);
 
 	// TEARDOWN
-	Game::mobileList = list<Mobile>();
+	Game::mobileList = list<Mobile*>();
 	delete ship;
-}	
+}
 
 void TestGame::testRemoveZombies()
 {
@@ -167,9 +169,9 @@ void TestGame::testRemoveZombies()
 	Mobile* m2 = new Mobile();
 	Mobile* m3 = new Mobile();
 
-	Game::addMobile(*m1);
-	Game::addMobile(*m2);
-	Game::addMobile(*m3);
+	Game::addMobile(m1);
+	Game::addMobile(m2);
+	Game::addMobile(m3);
 
 	int startSize = Game::mobileList.size();
 
@@ -185,6 +187,6 @@ void TestGame::testRemoveZombies()
 	assert(m3->isAlive());
 
 	// TEARDOWN
-	Game::mobileList = list<Mobile>();
+	Game::mobileList = list<Mobile*>();
 	delete m3;
-}	
+}
