@@ -27,7 +27,7 @@ protected:
 	double rotationSpeed;
 };
 
-class Sputnik : public Mobile{
+class Sputnik : public Mobile {
 public:
 	Sputnik(Position pt, double dx, double dy) : Mobile() {
 		position = pt;
@@ -95,4 +95,6 @@ public:
 		this->dy = dy;
 		radius = 10.0;
 	}
+	
+	void kill();
 };
